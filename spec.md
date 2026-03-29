@@ -1,31 +1,30 @@
 # HalfBuilt
 
 ## Current State
-Backend submitProject has no contactLink. Stats are hardcoded. Directory shows generic empty state. ProjectCard has no buyer contact mechanism. Categories missing Prototypes.
+Backend has `exchangeGitHubCode(code)` and `syncGitHubProfile(accessToken)` functions compiled and ready. The `UserProfile` Motoko type now includes `email`, `avatarUrl`, `githubLogin`, and `provider` optional fields. The frontend declarations (`backend.did.js`, `backend.did.d.ts`, `backend.d.ts`, `backend.ts`) still reflect the OLD `UserProfile` (name only) and do NOT expose `exchangeGitHubCode`, `syncGitHubProfile`, or `saveGoogleProfile`. `OAuthCallback.tsx` currently just validates the state param and redirects -- it does not call any backend functions. The GitHub redirect URI mismatch: `useGitHubAuth.tsx` sends users to `/api/auth/callback/github` but the GitHub OAuth app is configured with `https://halfbuilt.caffeine.ai/oauth/callback`.
 
 ## Requested Changes (Diff)
 
 ### Add
-- contactLink stored per project in separate contactLinks map
-- unlockContact(id) backend function requiring auth
-- contactLink field to Submit and Landing quick-submit forms
-- Unlock Contact button on ProjectCard with auth gate
-- useUnlockContact mutation hook
+- `/oauth/callback` route in `App.tsx` pointing to `OAuthCallback`
+- `exchangeGitHubCode`, `syncGitHubProfile`, `saveGoogleProfile` to all declaration files and `backend.ts`
+- GitHub user display in `Navbar.tsx` (avatar + name, matching Google user display)
+- `GitHubAuthProvider` wrapper in `main.tsx`
 
 ### Modify
-- submitProject: add contactLink 5th param
-- Landing STATS: live project count, static 5 Active Sectors, Forensic Shield Active
-- Directory empty state: sector-specific message vs search message
-- Categories: add Prototypes (5 total)
+- `UserProfile` type everywhere: add `email`, `avatarUrl`, `githubLogin`, `provider` as optional fields
+- `OAuthCallback.tsx`: wire the full flow (get code from URL → call `exchangeGitHubCode` → call `syncGitHubProfile` → save to localStorage → update `GitHubAuthContext` → redirect to `/my-projects`)
+- `useGitHubAuth.tsx`: fix `GITHUB_REDIRECT_URI` to `https://halfbuilt.caffeine.ai/oauth/callback`
+- `Navbar.tsx`: add GitHub signed-in state (show avatar, name, sign out)
 
 ### Remove
-- Hardcoded marketing numbers from STATS
+- Nothing
 
 ## Implementation Plan
-1. Update main.mo with contactLinks map and unlockContact function
-2. Update backend.d.ts and declarations
-3. Update useQueries.ts hooks
-4. Update Landing.tsx stats
-5. Update Submit.tsx with contactLink field
-6. Update Directory.tsx empty state and categories
-7. Update ProjectCard.tsx with Unlock Contact button
+1. Update `useGitHubAuth.tsx` redirect URI to `/oauth/callback`
+2. Add `/oauth/callback` route to `App.tsx` (keep `/api/auth/callback/github` too for safety)
+3. Add `GitHubAuthProvider` to `main.tsx`
+4. Update Candid declarations (`backend.did.d.ts`, `backend.did.js`) with new `UserProfile` type and new service methods
+5. Update `backend.d.ts` and `backend.ts` with new `UserProfile`, `exchangeGitHubCode`, `syncGitHubProfile`, `saveGoogleProfile`
+6. Wire `OAuthCallback.tsx` with full backend handshake + localStorage + context update + redirect
+7. Update `Navbar.tsx` to show GitHub user avatar and name when signed in via GitHub

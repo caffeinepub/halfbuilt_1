@@ -28,12 +28,19 @@ export const Project = IDL.Record({
   'category' : IDL.Text,
   'price' : IDL.Float64,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Opt(IDL.Text),
+  'avatarUrl' : IDL.Opt(IDL.Text),
+  'githubLogin' : IDL.Opt(IDL.Text),
+  'provider' : IDL.Opt(IDL.Text),
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'approveProject' : IDL.Func([IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'exchangeGitHubCode' : IDL.Func([IDL.Text], [IDL.Text], []),
   'getApprovedProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
@@ -47,11 +54,13 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'rejectProject' : IDL.Func([IDL.Nat], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveGoogleProfile' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'submitProject' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Float64],
       [IDL.Nat],
       [],
     ),
+  'syncGitHubProfile' : IDL.Func([IDL.Text], [UserProfile], []),
 });
 
 export const idlInitArgs = [];
@@ -77,12 +86,19 @@ export const idlFactory = ({ IDL }) => {
     'category' : IDL.Text,
     'price' : IDL.Float64,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
-  
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Opt(IDL.Text),
+    'avatarUrl' : IDL.Opt(IDL.Text),
+    'githubLogin' : IDL.Opt(IDL.Text),
+    'provider' : IDL.Opt(IDL.Text),
+  });
+
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'approveProject' : IDL.Func([IDL.Nat], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'exchangeGitHubCode' : IDL.Func([IDL.Text], [IDL.Text], []),
     'getApprovedProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
@@ -96,11 +112,13 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'rejectProject' : IDL.Func([IDL.Nat], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveGoogleProfile' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'submitProject' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Float64],
         [IDL.Nat],
         [],
       ),
+    'syncGitHubProfile' : IDL.Func([IDL.Text], [UserProfile], []),
   });
 };
 

@@ -23,7 +23,13 @@ export interface Project {
 export type ProjectStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null };
-export interface UserProfile { 'name' : string }
+export interface UserProfile {
+  'name' : string,
+  'email' : [] | [string],
+  'avatarUrl' : [] | [string],
+  'githubLogin' : [] | [string],
+  'provider' : [] | [string],
+}
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -31,6 +37,7 @@ export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'approveProject' : ActorMethod<[bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'exchangeGitHubCode' : ActorMethod<[string], string>,
   'getApprovedProjects' : ActorMethod<[], Array<Project>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
@@ -40,7 +47,9 @@ export interface _SERVICE {
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'rejectProject' : ActorMethod<[bigint], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveGoogleProfile' : ActorMethod<[string, string, string], undefined>,
   'submitProject' : ActorMethod<[string, string, string, number, string], bigint>,
+  'syncGitHubProfile' : ActorMethod<[string], UserProfile>,
   'unlockContact' : ActorMethod<[bigint], string>,
 }
 export declare const idlService: IDL.ServiceClass;

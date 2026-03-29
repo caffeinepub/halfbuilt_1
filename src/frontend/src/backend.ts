@@ -101,6 +101,10 @@ export interface Project {
 }
 export interface UserProfile {
     name: string;
+    email: string | null;
+    avatarUrl: string | null;
+    githubLogin: string | null;
+    provider: string | null;
 }
 export enum ProjectStatus {
     pending = "pending",
@@ -116,6 +120,7 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     approveProject(id: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    exchangeGitHubCode(code: string): Promise<string>;
     getApprovedProjects(): Promise<Array<Project>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -125,9 +130,20 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     rejectProject(id: bigint): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveGoogleProfile(name: string, email: string, avatarUrl: string): Promise<void>;
     submitProject(name: string, description: string, category: string, price: number): Promise<bigint>;
+    syncGitHubProfile(accessToken: string): Promise<UserProfile>;
 }
 import type { Project as _Project, ProjectStatus as _ProjectStatus, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+function from_candid_UserProfile(p: _UserProfile): UserProfile {
+    return {
+        name: p.name,
+        email: p.email.length > 0 ? p.email[0] : null,
+        avatarUrl: p.avatarUrl.length > 0 ? p.avatarUrl[0] : null,
+        githubLogin: p.githubLogin.length > 0 ? p.githubLogin[0] : null,
+        provider: p.provider.length > 0 ? p.provider[0] : null,
+    };
+}
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -169,6 +185,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async exchangeGitHubCode(arg0: string): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.exchangeGitHubCode(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.exchangeGitHubCode(arg0);
             return result;
         }
     }
@@ -298,6 +328,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async saveGoogleProfile(arg0: string, arg1: string, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveGoogleProfile(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveGoogleProfile(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async submitProject(arg0: string, arg1: string, arg2: string, arg3: number): Promise<bigint> {
         if (this.processError) {
             try {
@@ -312,6 +356,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async syncGitHubProfile(arg0: string): Promise<UserProfile> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.syncGitHubProfile(arg0);
+                return from_candid_UserProfile(result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.syncGitHubProfile(arg0);
+            return from_candid_UserProfile(result);
+        }
+    }
 }
 function from_candid_ProjectStatus_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ProjectStatus): ProjectStatus {
     return from_candid_variant_n7(_uploadFile, _downloadFile, value);
@@ -323,7 +381,7 @@ function from_candid_UserRole_n9(_uploadFile: (file: ExternalBlob) => Promise<Ui
     return from_candid_variant_n10(_uploadFile, _downloadFile, value);
 }
 function from_candid_opt_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
-    return value.length === 0 ? null : value[0];
+    return value.length === 0 ? null : from_candid_UserProfile(value[0]);
 }
 function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;

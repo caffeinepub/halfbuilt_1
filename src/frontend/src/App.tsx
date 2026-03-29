@@ -5,7 +5,6 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
-  redirect,
 } from "@tanstack/react-router";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
@@ -13,6 +12,7 @@ import Admin from "./pages/Admin";
 import Directory from "./pages/Directory";
 import Landing from "./pages/Landing";
 import MyProjects from "./pages/MyProjects";
+import OAuthCallback from "./pages/OAuthCallback";
 import Submit from "./pages/Submit";
 
 const rootRoute = createRootRoute({
@@ -59,6 +59,16 @@ const myProjectsRoute = createRoute({
   path: "/my-projects",
   component: MyProjects,
 });
+const oauthCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/api/auth/callback/github",
+  component: OAuthCallback,
+});
+const oauthCallbackRoute2 = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/oauth/callback",
+  component: OAuthCallback,
+});
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -66,6 +76,8 @@ const routeTree = rootRoute.addChildren([
   submitRoute,
   adminRoute,
   myProjectsRoute,
+  oauthCallbackRoute,
+  oauthCallbackRoute2,
 ]);
 
 const router = createRouter({ routeTree });

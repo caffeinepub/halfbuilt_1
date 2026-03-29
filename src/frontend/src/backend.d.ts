@@ -19,6 +19,10 @@ export interface Project {
 }
 export interface UserProfile {
     name: string;
+    email: string | null;
+    avatarUrl: string | null;
+    githubLogin: string | null;
+    provider: string | null;
 }
 export enum ProjectStatus {
     pending = "pending",
@@ -33,6 +37,7 @@ export enum UserRole {
 export interface backendInterface {
     approveProject(id: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    exchangeGitHubCode(code: string): Promise<string>;
     getApprovedProjects(): Promise<Array<Project>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -42,6 +47,8 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     rejectProject(id: bigint): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveGoogleProfile(name: string, email: string, avatarUrl: string): Promise<void>;
     submitProject(name: string, description: string, category: string, price: number, contactLink: string): Promise<bigint>;
+    syncGitHubProfile(accessToken: string): Promise<UserProfile>;
     unlockContact(id: bigint): Promise<string>;
 }
